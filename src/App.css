@@ -558,6 +558,11 @@
   cursor: pointer;
 }
 
+.form-select option {
+  background-color: #0d0f14 !important; /* Dark solid background for popup menu */
+  color: #f8fafc !important;            /* High contrast white text */
+}
+
 .form-select:focus {
   border-color: var(--color-primary);
   box-shadow: 0 0 15px rgba(0, 240, 255, 0.1);

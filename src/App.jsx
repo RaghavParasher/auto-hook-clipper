@@ -163,15 +163,18 @@ export default function App() {
       const data = await res.json();
       const rawText = data.candidates[0].content.parts[0].text;
       
-      // Clean JSON string in case API wrapped it in markdown code blocks
-      const cleanJson = rawText.replace(/```json|```/g, '').trim();
-      const variations = JSON.parse(cleanJson);
+      // Bulletproof JSON array extraction using regex
+      const jsonMatch = rawText.match(/\[[\s\S]*\]/);
+      if (!jsonMatch) {
+        throw new Error("API response did not contain a valid JSON list format.");
+      }
       
+      const variations = JSON.parse(jsonMatch[0]);
       if (Array.isArray(variations)) {
-        setAiSuggestions(variations);
+        setAiSuggestions(variations.slice(0, 3));
         triggerToast('AI recommendations loaded! 🤖');
       } else {
-        throw new Error('Failed to parse AI output as a list.');
+        throw new Error('Parsed response is not a valid list.');
       }
     } catch (err) {
       console.error(err);

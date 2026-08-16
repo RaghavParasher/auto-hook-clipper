@@ -33,10 +33,10 @@ export default function App() {
 
   // Phone backgrounds list
   const phoneBackgrounds = [
-    'linear-gradient(180deg, #181d26 0%, #0c0e14 100%)',
-    'linear-gradient(135deg, #1f112e 0%, #0d0617 100%)',
-    'linear-gradient(135deg, #092026 0%, #040d10 100%)',
-    'linear-gradient(135deg, #261515 0%, #0d0606 100%)'
+    'linear-gradient(135deg, #00f0ff 0%, #bd5cff 100%)',
+    'linear-gradient(135deg, #ff5e62 0%, #ff9966 100%)',
+    'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
+    'linear-gradient(135deg, #00c6ff 0%, #0072ff 100%)'
   ];
 
   // Helper: Combine template text with inputs

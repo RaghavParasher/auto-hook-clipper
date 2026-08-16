@@ -387,7 +387,7 @@ export default function App() {
               <div 
                 className="phone-mockup"
                 style={{
-                  backgroundImage: `url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=300&auto=format&fit=crop')`, 
+                  background: phoneBackgrounds[bgPreset], 
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   backgroundRepeat: 'no-repeat'

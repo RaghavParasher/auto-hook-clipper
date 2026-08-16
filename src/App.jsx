@@ -5,9 +5,7 @@ import './App.css';
 
 export default function App() {
   // Config & Modals States
-  const [showApiKeyModal, setShowApiKeyModal] = useState(false);
-  const [apiKey, setApiKey] = useState(localStorage.getItem('gemini_api_key') || '');
-  const [tempApiKey, setTempApiKey] = useState(apiKey);
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
   
   // App Modes: template or free
   const [mode, setMode] = useState('template'); // template, free
@@ -124,13 +122,7 @@ export default function App() {
     setTimeout(() => setShowToast(false), 2000);
   };
 
-  // Save API Key
-  const saveApiKey = () => {
-    localStorage.setItem('gemini_api_key', tempApiKey.trim());
-    setApiKey(tempApiKey.trim());
-    setShowApiKeyModal(false);
-    triggerToast('API Key saved successfully!');
-  };
+  // Save API Key removed. Configured via environment variables.
 
   // Copy to clipboard
   const copyToClipboard = (text) => {
@@ -141,7 +133,7 @@ export default function App() {
   // Call Gemini API to polish hooks
   const polishHookWithAI = async () => {
     if (!apiKey) {
-      setShowApiKeyModal(true);
+      triggerToast('Configure VITE_GEMINI_API_KEY in your env to enable AI! 🤖');
       return;
     }
 
@@ -151,7 +143,7 @@ export default function App() {
     const prompt = `You are a viral copywriting expert. Take the following video hook: "${hookText}". Generate exactly 3 highly engaging, high-converting variations of this hook that leverage psychological curiosity gaps, negative framing, or authority. Keep each hook under 15 words. Format your output strictly as a JSON array of strings, for example: ["Variation 1", "Variation 2", "Variation 3"]. Output ONLY the raw JSON block without markdown formatting or surrounding explanation text.`;
 
     try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
       const res = await fetch(url, {
         method: 'POST',
         headers: {
@@ -223,16 +215,11 @@ export default function App() {
           <span className="tagline">v1.0 Local</span>
         </div>
         <div className="header-actions">
-          <button className="btn btn-secondary" style={{padding: '8px 12px'}} onClick={() => {
-            setTempApiKey(apiKey);
-            setShowApiKeyModal(true);
-          }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-            </svg>
-            API Key
-          </button>
+          {import.meta.env.VITE_GEMINI_API_KEY ? (
+            <span className="tagline" style={{color: 'var(--color-success)', border: '1px solid rgba(74, 222, 128, 0.2)'}}>🤖 AI CONNECTED</span>
+          ) : (
+            <span className="tagline" style={{color: 'var(--text-muted)'}}>OFFLINE MODE</span>
+          )}
         </div>
       </header>
 
@@ -534,39 +521,7 @@ export default function App() {
 
       </main>
 
-      {/* Modal: API Key settings */}
-      {showApiKeyModal && (
-        <div className="modal-overlay">
-          <div className="modal-card">
-            <div className="modal-header">
-              <h3 style={{fontWeight: 800}}>Set Gemini API Key</h3>
-              <button className="modal-close" onClick={() => setShowApiKeyModal(false)}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-              </button>
-            </div>
-            <p style={{fontSize: '12px', color: 'var(--text-secondary)'}}>
-              Provide your Google AI Studio API Key to unlock the "AI Polish" rewriter button. Your key will be saved locally inside your web browser.
-            </p>
-            <div className="form-group">
-              <label className="blank-label">Gemini API Key (AIzaSy...)</label>
-              <input 
-                type="text" 
-                className="blank-input" 
-                placeholder="Paste key here"
-                value={tempApiKey}
-                onChange={(e) => setTempApiKey(e.target.value)}
-              />
-            </div>
-            <div style={{display: 'flex', gap: '10px', marginTop: '10px'}}>
-              <button className="btn btn-secondary" style={{flex: 1}} onClick={() => setShowApiKeyModal(false)}>Cancel</button>
-              <button className="btn" style={{flex: 1}} onClick={saveApiKey}>Save Key</button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Modal removed: API Key configured via environment variables */}
 
       {/* Toast Notification */}
       <div className={`toast ${showToast ? 'show' : ''}`}>

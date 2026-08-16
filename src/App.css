@@ -1,10 +1,10 @@
-/* Ultra-Premium Futuristic Theme for HookGen */
+/* Ultra-Premium Futuristic Theme for HookGen with animations and alerts */
 
 :root {
-  --bg-primary: #0a0c10;
-  --bg-secondary: rgba(17, 22, 32, 0.65);
-  --bg-tertiary: rgba(26, 33, 48, 0.8);
-  --border-color: rgba(255, 255, 255, 0.07);
+  --bg-primary: #080a0f;
+  --bg-secondary: rgba(13, 17, 28, 0.7);
+  --bg-tertiary: rgba(22, 28, 45, 0.85);
+  --border-color: rgba(255, 255, 255, 0.08);
   --text-primary: #f8fafc;
   --text-secondary: #cbd5e1;
   --text-muted: #64748b;
@@ -14,10 +14,17 @@
   --color-secondary: #bd5cff;
   --color-secondary-rgb: 189, 92, 255;
   
+  --color-success: #22c55e;
+  --color-warning: #eab308;
+  --color-danger: #ef4444;
+  
   --radius-sm: 8px;
   --radius-md: 14px;
   --radius-lg: 20px;
   --radius-xl: 30px;
+  
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .app-layout {
@@ -25,17 +32,53 @@
   flex-direction: column;
   min-height: 100vh;
   background-color: var(--bg-primary);
-  /* Futuristic background glowing blobs */
-  background-image: 
-    radial-gradient(circle at 10% 20%, rgba(0, 240, 255, 0.05) 0%, transparent 40%),
-    radial-gradient(circle at 90% 80%, rgba(189, 92, 255, 0.06) 0%, transparent 45%),
-    radial-gradient(circle at 50% 50%, rgba(10, 12, 16, 1) 0%, rgba(10, 12, 16, 1) 100%);
-  background-attachment: fixed;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Animated Floating Background Glows */
+.glow-blob-1, .glow-blob-2 {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(120px);
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.45;
+}
+
+.glow-blob-1 {
+  top: -10%;
+  left: -10%;
+  width: 40vw;
+  height: 40vw;
+  background: radial-gradient(circle, rgba(0, 240, 255, 0.15) 0%, transparent 70%);
+  animation: float-glow-1 25s infinite alternate ease-in-out;
+}
+
+.glow-blob-2 {
+  bottom: -10%;
+  right: -10%;
+  width: 45vw;
+  height: 45vw;
+  background: radial-gradient(circle, rgba(189, 92, 255, 0.15) 0%, transparent 70%);
+  animation: float-glow-2 30s infinite alternate ease-in-out;
+}
+
+@keyframes float-glow-1 {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(5vw, 5vh) scale(1.1); }
+  100% { transform: translate(-2vw, 10vh) scale(0.9); }
+}
+
+@keyframes float-glow-2 {
+  0% { transform: translate(0, 0) scale(0.9); }
+  50% { transform: translate(-6vw, -8vh) scale(1.15); }
+  100% { transform: translate(2vw, 4vh) scale(1); }
 }
 
 .header {
   height: 76px;
-  background-color: rgba(10, 12, 16, 0.7);
+  background-color: rgba(8, 10, 15, 0.75);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border-color);
@@ -65,7 +108,7 @@
   color: #000;
   font-weight: 800;
   font-size: 20px;
-  box-shadow: 0 0 20px rgba(0, 240, 255, 0.35);
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
 }
 
 .logo-text {
@@ -95,18 +138,20 @@
   gap: 16px;
 }
 
-/* Page spacing and boundaries */
+/* Page content grid container */
 .workspace-container {
-  max-width: 1200px;
+  max-width: 1100px;
   width: 100%;
   margin: 0 auto;
   padding: 60px 24px 100px 24px;
   display: flex;
   flex-direction: column;
   gap: 48px;
+  z-index: 10;
+  position: relative;
 }
 
-/* Hero Branding Headers */
+/* Hero headers */
 .hero-block {
   text-align: center;
   max-width: 700px;
@@ -117,11 +162,11 @@
 }
 
 .hero-title {
-  font-size: 46px;
+  font-size: 48px;
   font-weight: 800;
-  letter-spacing: -1.8px;
+  letter-spacing: -2px;
   line-height: 1.1;
-  background: linear-gradient(180deg, var(--text-primary) 0%, rgba(255,255,255,0.7) 100%);
+  background: linear-gradient(180deg, var(--text-primary) 0%, rgba(255,255,255,0.65) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -130,28 +175,37 @@
   font-size: 16px;
   color: var(--text-secondary);
   line-height: 1.6;
-  font-weight: 400;
 }
 
-/* Section Card Panels (Glassmorphism) */
+/* Premium Card Panels (Glassmorphism) */
 .section-card {
   background-color: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
   padding: 40px;
   box-shadow: 
-    0 20px 40px -15px rgba(0, 0, 0, 0.5),
+    0 25px 50px -12px rgba(0, 0, 0, 0.6),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   display: flex;
   flex-direction: column;
   gap: 28px;
-  transition: border-color var(--transition-normal);
+  position: relative;
+  overflow: hidden;
 }
 
-.section-card:hover {
-  border-color: rgba(255, 255, 255, 0.12);
+/* Neon Top Line on Cards */
+.section-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+  z-index: 10;
+  opacity: 0.8;
 }
 
 .section-header {
@@ -185,7 +239,7 @@
   color: var(--text-primary);
 }
 
-/* Horizontal templates deck */
+/* Horizontal card list */
 .templates-carousel {
   display: flex;
   gap: 20px;
@@ -195,7 +249,7 @@
 }
 
 .template-card {
-  flex: 0 0 260px;
+  flex: 0 0 250px;
   scroll-snap-align: start;
   background-color: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--border-color);
@@ -244,7 +298,7 @@
   line-height: 1.5;
 }
 
-/* Input textareas/textfields */
+/* Inputs grid layout */
 .inputs-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -264,8 +318,6 @@
   color: var(--text-secondary);
   font-family: var(--font-mono);
   letter-spacing: 0.8px;
-  display: flex;
-  justify-content: space-between;
 }
 
 .blank-input {
@@ -294,15 +346,15 @@
   line-height: 1.6;
 }
 
-/* Main Split Output Layout */
+/* Split grid for results */
 .results-grid {
   display: grid;
-  grid-template-columns: 1fr 1.2fr;
+  grid-template-columns: 1fr 1.25fr;
   gap: 40px;
   align-items: flex-start;
 }
 
-/* Left phone visualizer */
+/* Left phone column */
 .phone-panel {
   display: flex;
   flex-direction: column;
@@ -310,16 +362,35 @@
   gap: 28px;
 }
 
+/* Centered mockup shell with ambient neon shadow */
+.phone-mockup-wrapper {
+  position: relative;
+  padding: 10px;
+}
+
+.phone-mockup-wrapper::after {
+  content: '';
+  position: absolute;
+  top: 5%;
+  left: 5%;
+  right: 5%;
+  bottom: 5%;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  filter: blur(35px);
+  z-index: 0;
+  opacity: 0.15;
+  pointer-events: none;
+}
+
 .phone-mockup {
-  width: 330px;
-  height: 660px;
+  width: 320px;
+  height: 640px;
   background-color: #0b0d12;
   border: 14px solid #1c1f26;
   border-radius: 50px;
   box-shadow: 
     0 30px 60px -20px rgba(0,0,0,0.8),
-    0 0 0 1px rgba(255, 255, 255, 0.05),
-    0 0 40px rgba(0, 240, 255, 0.05);
+    0 0 0 1px rgba(255, 255, 255, 0.05);
   position: relative;
   overflow: hidden;
   display: flex;
@@ -329,6 +400,7 @@
   background-size: cover;
   background-position: center;
   transition: background-image var(--transition-normal);
+  z-index: 1;
 }
 
 .phone-mockup::before {
@@ -338,7 +410,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.7) 85%);
+  background: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.7) 85%);
   z-index: 1;
 }
 
@@ -394,6 +466,7 @@
   align-items: center;
   gap: 28px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  position: relative;
 }
 
 .overall-score-circle {
@@ -406,7 +479,13 @@
   align-items: center;
   justify-content: center;
   position: relative;
-  box-shadow: 0 0 20px rgba(0, 240, 255, 0.1);
+  box-shadow: 0 0 25px rgba(0, 240, 255, 0.1);
+  animation: pulse-border 3s infinite alternate ease-in-out;
+}
+
+@keyframes pulse-border {
+  0% { box-shadow: 0 0 15px rgba(0, 240, 255, 0.08); }
+  100% { box-shadow: 0 0 30px rgba(0, 240, 255, 0.22); }
 }
 
 .overall-score-num {
@@ -424,6 +503,25 @@
   font-family: var(--font-mono);
   margin-top: 4px;
   letter-spacing: 1px;
+}
+
+/* Letter Grade Badge overlay */
+.grade-badge {
+  position: absolute;
+  top: -12px;
+  right: -12px;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  color: #000;
+  font-weight: 900;
+  font-size: 16px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 15px var(--color-primary);
+  border: 2px solid var(--bg-primary);
 }
 
 .score-stats {
@@ -446,7 +544,7 @@
   text-transform: uppercase;
 }
 
-/* Customizer inputs select */
+/* Customizer selection selectboxes */
 .form-select {
   background-color: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--border-color);
@@ -465,7 +563,98 @@
   box-shadow: 0 0 15px rgba(0, 240, 255, 0.1);
 }
 
-/* Dynamic Advice List items */
+/* Metrics and progress bars */
+.metric-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background-color: rgba(255, 255, 255, 0.01);
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+.metric-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  align-items: center;
+}
+
+.metric-name {
+  font-weight: 700;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.metric-val {
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+.progress-track {
+  width: 100%;
+  height: 8px;
+  background-color: rgba(255, 255, 255, 0.03);
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: var(--color-primary);
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Copied variations styling */
+.ai-variation-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background-color: rgba(255, 255, 255, 0.015);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  transition: border-color 0.2s ease;
+}
+
+.ai-variation-card:hover {
+  border-color: rgba(189, 92, 255, 0.4);
+}
+
+.ai-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ai-avatar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-secondary);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.ai-avatar svg {
+  color: var(--color-secondary);
+}
+
+/* Subtitle customizer selectors card */
+.customizer-card {
+  background-color: rgba(255, 255, 255, 0.01);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 20px;
+}
+
+/* Offline list tips advice */
 .tips-list {
   display: flex;
   flex-direction: column;
@@ -487,7 +676,11 @@
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
-/* Trigger word selection badges */
+.tip-text {
+  color: var(--text-secondary);
+}
+
+/* Trigger word cloud options */
 .word-pill {
   background-color: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--border-color);
@@ -508,7 +701,7 @@
   box-shadow: 0 4px 10px rgba(0, 240, 255, 0.1);
 }
 
-/* Premium Button Actions */
+/* Action button configurations */
 .btn {
   background: linear-gradient(180deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
   color: #000;
@@ -559,4 +752,52 @@
 
 .btn-accent:hover {
   box-shadow: 0 6px 24px rgba(189, 92, 255, 0.4);
+}
+
+.toast {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background-color: rgba(22, 28, 45, 0.95);
+  border: 1px solid var(--color-success);
+  border-radius: var(--radius-md);
+  padding: 12px 24px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 110;
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+  backdrop-filter: blur(8px);
+}
+
+.toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(0, 0, 0, 0.15);
+  border-top-color: #000;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 860px) {
+  .results-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  .inputs-grid {
+    grid-template-columns: 1fr;
+  }
 }

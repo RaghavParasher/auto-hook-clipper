@@ -21,7 +21,7 @@ export default function App() {
   const [captionFont, setCaptionFont] = useState('Arial Black');
   const [captionSize, setCaptionSize] = useState(26);
   const [captionColor, setCaptionColor] = useState('#FFFF00');
-  const [captionStyle, setCaptionStyle] = useState('capitalized'); // capitalized, normal, uppercase
+  const [captionStyle, setCaptionStyle] = useState('capitalized'); 
   const [bgPreset, setBgPreset] = useState(0); 
   const [activeWordIdx, setActiveWordIdx] = useState(0);
 
@@ -53,6 +53,18 @@ export default function App() {
 
   const hookText = getHookText();
   const evaluation = evaluateHook(hookText);
+
+  // Calculate letter grade based on score
+  const getGrade = (score) => {
+    if (score >= 90) return 'A+';
+    if (score >= 80) return 'A';
+    if (score >= 70) return 'B';
+    if (score >= 60) return 'C';
+    if (score >= 50) return 'D';
+    return 'F';
+  };
+
+  const letterGrade = getGrade(evaluation.overall);
 
   // Reset inputs when template changes
   useEffect(() => {
@@ -127,7 +139,23 @@ export default function App() {
     triggerToast('Hook copied to clipboard! 📋');
   };
 
-  // Call Gemini API to polish hooks
+  // Helper fetch function for models
+  const fetchGeminiResponse = async (modelName, promptText) => {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+    return await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{ text: promptText }]
+        }]
+      })
+    });
+  };
+
+  // Call Gemini API with automatic fallback chains to prevent 503/404 errors
   const polishHookWithAI = async () => {
     if (!apiKey) {
       triggerToast('Configure VITE_GEMINI_API_KEY in your env to enable AI! 🤖');
@@ -140,18 +168,20 @@ export default function App() {
     const prompt = `You are a viral copywriting expert. Take the following video hook: "${hookText}". Generate exactly 3 highly engaging, high-converting variations of this hook that leverage psychological curiosity gaps, negative framing, or authority. Keep each hook under 15 words. Format your output strictly as a JSON array of strings, for example: ["Variation 1", "Variation 2", "Variation 3"]. Output ONLY the raw JSON block without markdown formatting or surrounding explanation text.`;
 
     try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`;
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          contents: [{
-            parts: [{ text: prompt }]
-          }]
-        })
-      });
+      let res;
+      // Try Primary Model (gemini-flash-latest)
+      try {
+        res = await fetchGeminiResponse('gemini-flash-latest', prompt);
+        
+        // If primary model returns 503 or 404, trigger fallback immediately
+        if (res.status === 503 || res.status === 404) {
+          console.warn(`Primary model failed with status ${res.status}. Falling back to gemini-flash-lite-latest...`);
+          res = await fetchGeminiResponse('gemini-flash-lite-latest', prompt);
+        }
+      } catch (primaryErr) {
+        console.warn('Primary fetch failed. Querying fallback model...', primaryErr);
+        res = await fetchGeminiResponse('gemini-flash-lite-latest', prompt);
+      }
 
       if (!res.ok) {
         throw new Error(`API returned status ${res.status}`);
@@ -207,6 +237,10 @@ export default function App() {
 
   return (
     <div className="app-layout">
+      {/* Drifting Background Glow Elements */}
+      <div className="glow-blob-1"></div>
+      <div className="glow-blob-2"></div>
+
       {/* Frosted Header */}
       <header className="header">
         <div className="brand">
@@ -216,7 +250,7 @@ export default function App() {
         </div>
         <div className="header-actions">
           {apiKey ? (
-            <span className="tagline" style={{color: 'var(--color-success)', border: '1px solid rgba(74, 222, 128, 0.2)'}}>🤖 AI CONNECTED</span>
+            <span className="tagline" style={{color: 'var(--color-success)', border: '1px solid rgba(34, 197, 94, 0.2)'}}>🤖 AI CONNECTED</span>
           ) : (
             <span className="tagline" style={{color: 'var(--text-muted)'}}>OFFLINE MODE</span>
           )}
@@ -349,40 +383,42 @@ export default function App() {
               <h2 className="section-title">Kinetic Subtitle Preview</h2>
             </div>
 
-            <div 
-              className="phone-mockup"
-              style={{
-                backgroundImage: `url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=300&auto=format&fit=crop')`, 
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat'
-              }}
-            >
-              <div className="phone-notch"></div>
-              
-              <div className="simulated-caption-wrapper">
-                <div 
-                  className="simulated-caption"
-                  style={{
-                    fontFamily: captionFont === 'Impact' ? 'Impact, sans-serif' : captionFont === 'Comic Sans MS' ? '"Comic Sans MS", cursive' : captionFont === 'Trebuchet MS' ? '"Trebuchet MS", sans-serif' : '"Arial Black", sans-serif',
-                    fontSize: `${captionSize}px`,
-                    color: captionColor
-                  }}
-                >
-                  {subtitleWords.map((word, idx) => {
-                    const isActive = activeWordIdx === idx;
-                    return (
-                      <span 
-                        key={idx}
-                        className={isActive ? 'word-highlight' : ''}
-                        style={{
-                          color: isActive ? captionColor : '#FFFFFF'
-                        }}
-                      >
-                        {word}
-                      </span>
-                    );
-                  })}
+            <div className="phone-mockup-wrapper">
+              <div 
+                className="phone-mockup"
+                style={{
+                  backgroundImage: `url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=300&auto=format&fit=crop')`, 
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'no-repeat'
+                }}
+              >
+                <div className="phone-notch"></div>
+                
+                <div className="simulated-caption-wrapper">
+                  <div 
+                    className="simulated-caption"
+                    style={{
+                      fontFamily: captionFont === 'Impact' ? 'Impact, sans-serif' : captionFont === 'Comic Sans MS' ? '"Comic Sans MS", cursive' : captionFont === 'Trebuchet MS' ? '"Trebuchet MS", sans-serif' : '"Arial Black", sans-serif',
+                      fontSize: `${captionSize}px`,
+                      color: captionColor
+                    }}
+                  >
+                    {subtitleWords.map((word, idx) => {
+                      const isActive = activeWordIdx === idx;
+                      return (
+                        <span 
+                          key={idx}
+                          className={isActive ? 'word-highlight' : ''}
+                          style={{
+                            color: isActive ? captionColor : '#FFFFFF'
+                          }}
+                        >
+                          {word}
+                        </span>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             </div>
@@ -408,11 +444,12 @@ export default function App() {
               <h2 className="section-title">Copywriting Analytics & AI</h2>
             </div>
 
-            {/* Overal scoring dial banner */}
+            {/* Overal scoring dial banner with Letter Grade overlay */}
             <div className="score-summary-card">
               <div className="overall-score-circle" style={{border: `4px solid ${getMetricColor(evaluation.overall)}`}}>
                 <span className="overall-score-num" style={{color: getMetricColor(evaluation.overall)}}>{evaluation.overall}</span>
                 <span className="overall-score-label">Score</span>
+                <div className="grade-badge">{letterGrade}</div>
               </div>
               <div className="score-stats">
                 <span className="score-title">Hook Performance</span>
@@ -422,11 +459,18 @@ export default function App() {
               </div>
             </div>
 
-            {/* Core grading progress bars */}
+            {/* Core grading progress bars with custom SVG icons */}
             <div style={{display: 'flex', flexDirection: 'column', gap: '16px'}}>
               <div className="metric-row">
                 <div className="metric-meta">
-                  <span className="metric-name">Curiosity (Psychological Loop)</span>
+                  <span className="metric-name">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2.5">
+                      <circle cx="12" cy="12" r="10"/>
+                      <path d="M12 16v-4"/>
+                      <path d="M12 8h.01"/>
+                    </svg>
+                    Curiosity (Psychological Loop)
+                  </span>
                   <span className="metric-val" style={{color: getMetricColor(evaluation.curiosity)}}>{evaluation.curiosity}%</span>
                 </div>
                 <div className="progress-track">
@@ -435,7 +479,13 @@ export default function App() {
               </div>
               <div className="metric-row">
                 <div className="metric-meta">
-                  <span className="metric-name">Clarity (Readability Index)</span>
+                  <span className="metric-name">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2.5">
+                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                      <polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                    Clarity (Readability Index)
+                  </span>
                   <span className="metric-val" style={{color: getMetricColor(evaluation.clarity)}}>{evaluation.clarity}%</span>
                 </div>
                 <div className="progress-track">
@@ -444,7 +494,12 @@ export default function App() {
               </div>
               <div className="metric-row">
                 <div className="metric-meta">
-                  <span className="metric-name">Urgency (Instant Attention)</span>
+                  <span className="metric-name">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2.5">
+                      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                    </svg>
+                    Urgency (Instant Attention)
+                  </span>
                   <span className="metric-val" style={{color: getMetricColor(evaluation.urgency)}}>{evaluation.urgency}%</span>
                 </div>
                 <div className="progress-track">
@@ -453,7 +508,12 @@ export default function App() {
               </div>
               <div className="metric-row">
                 <div className="metric-meta">
-                  <span className="metric-name">Emotional Appeal</span>
+                  <span className="metric-name">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2.5">
+                      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                    </svg>
+                    Emotional Appeal
+                  </span>
                   <span className="metric-val" style={{color: getMetricColor(evaluation.emotion)}}>{evaluation.emotion}%</span>
                 </div>
                 <div className="progress-track">
@@ -463,8 +523,8 @@ export default function App() {
             </div>
 
             {/* Simulated subtitle controls */}
-            <div style={{borderTop: '1px solid var(--border-color)', paddingTop: '16px'}}>
-              <h5 className="blank-label" style={{marginBottom: '12px'}}>Customize Simulated Caption</h5>
+            <div className="customizer-card">
+              <h5 className="blank-label" style={{marginBottom: '14px'}}>Customize Simulated Caption</h5>
               <div className="config-grid">
                 <div className="form-group">
                   <label className="blank-label" style={{fontSize: '9px'}}>Font Style</label>
@@ -506,16 +566,23 @@ export default function App() {
               </button>
 
               {aiSuggestions.length > 0 && (
-                <div style={{backgroundColor: 'rgba(135, 90, 255, 0.04)', border: '1px solid rgba(135, 90, 255, 0.15)', padding: '16px', borderRadius: 'var(--radius-lg)'}}>
-                  <h6 className="blank-label" style={{color: 'var(--color-secondary)', marginBottom: '10px'}}>AI Recommended Variations (Click to Use):</h6>
-                  <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
-                    {aiSuggestions.map((s, idx) => (
-                      <div key={idx} style={{display: 'flex', gap: '10px', alignItems: 'center', fontSize: '13px', background: 'var(--bg-tertiary)', padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)'}}>
-                        <p style={{flex: 1, color: 'var(--text-primary)', fontWeight: '500'}}>{s}</p>
-                        <button className="word-pill" style={{padding: '4px 8px', fontSize: '11px', fontWeight: '600'}} onClick={() => selectSuggestedHook(s)}>Use</button>
+                <div style={{display: 'flex', flexDirection: 'column', gap: '12px'}}>
+                  {aiSuggestions.map((s, idx) => (
+                    <div key={idx} className="ai-variation-card">
+                      <div className="ai-meta">
+                        <div className="ai-avatar">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                            <path d="M12 2v9"/>
+                            <path d="M8 5h8"/>
+                          </svg>
+                          Gemini Co-Pilot #{idx + 1}
+                        </div>
+                        <button className="word-pill" style={{padding: '4px 8px', fontSize: '11px', fontWeight: '700'}} onClick={() => selectSuggestedHook(s)}>Use</button>
                       </div>
-                    ))}
-                  </div>
+                      <p style={{color: 'var(--text-primary)', fontSize: '13px', lineHeight: '1.5', fontWeight: '500'}}>{s}</p>
+                    </div>
+                  ))}
                 </div>
               )}
 

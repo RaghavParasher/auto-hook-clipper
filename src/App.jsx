@@ -4,11 +4,11 @@ import { evaluateHook } from './utils/evaluator';
 import './App.css';
 
 export default function App() {
-  // Config & Modals States
+  // Config States
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
   
   // App Modes: template or free
-  const [mode, setMode] = useState('template'); // template, free
+  const [mode, setMode] = useState('template'); 
   const [activeTemplateIdx, setActiveTemplateIdx] = useState(0);
   const [inputs, setInputs] = useState(['', '']);
   const [customHookText, setCustomHookText] = useState('Stop making this common editing mistake if you want to get 100k views!');
@@ -22,7 +22,7 @@ export default function App() {
   const [captionSize, setCaptionSize] = useState(26);
   const [captionColor, setCaptionColor] = useState('#FFFF00');
   const [captionStyle, setCaptionStyle] = useState('capitalized'); // capitalized, normal, uppercase
-  const [bgPreset, setBgPreset] = useState(0); // index of background visual
+  const [bgPreset, setBgPreset] = useState(0); 
   const [activeWordIdx, setActiveWordIdx] = useState(0);
 
   // AI & Toast states
@@ -86,7 +86,7 @@ export default function App() {
             playWords(0);
           }, 1500);
         }
-      }, 380); // Average speaking pace (380ms per word)
+      }, 380); 
     };
 
     playWords(0);
@@ -102,7 +102,6 @@ export default function App() {
     if (mode === 'template') {
       const newInputs = [...inputs];
       const currentVal = newInputs[activeInputIdx] || '';
-      // Append space if not empty
       newInputs[activeInputIdx] = currentVal ? `${currentVal} ${word.toLowerCase()}` : word;
       setInputs(newInputs);
     } else {
@@ -121,8 +120,6 @@ export default function App() {
     setShowToast(true);
     setTimeout(() => setShowToast(false), 2000);
   };
-
-  // Save API Key removed. Configured via environment variables.
 
   // Copy to clipboard
   const copyToClipboard = (text) => {
@@ -210,7 +207,7 @@ export default function App() {
 
   return (
     <div className="app-layout">
-      {/* Header */}
+      {/* Frosted Header */}
       <header className="header">
         <div className="brand">
           <div className="logo-icon">H</div>
@@ -218,7 +215,7 @@ export default function App() {
           <span className="tagline">v1.0 Local</span>
         </div>
         <div className="header-actions">
-          {import.meta.env.VITE_GEMINI_API_KEY ? (
+          {apiKey ? (
             <span className="tagline" style={{color: 'var(--color-success)', border: '1px solid rgba(74, 222, 128, 0.2)'}}>🤖 AI CONNECTED</span>
           ) : (
             <span className="tagline" style={{color: 'var(--text-muted)'}}>OFFLINE MODE</span>
@@ -226,13 +223,26 @@ export default function App() {
         </div>
       </header>
 
-      {/* Main Workspace Dashboard Grid */}
-      <main className="dashboard-grid">
+      {/* Main Scrollable Workspace Container */}
+      <div className="workspace-container">
         
-        {/* COLUMN 1: Editor & Selectors */}
-        <div className="column">
-          {/* Mode Selector tabs */}
-          <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px'}}>
+        {/* Hero Banner text */}
+        <div className="hero-block">
+          <h1 className="hero-title">Craft Viral Video Hooks</h1>
+          <p className="hero-desc">
+            Use psychological frameworks, test their copywriting metrics in real-time, and preview kinetic caption animations inside the simulator—all offline and serverless.
+          </p>
+        </div>
+
+        {/* STEP 1: Inputs & Template Deck Card (Full Width) */}
+        <section className="section-card">
+          <div className="section-header">
+            <div className="section-num">01</div>
+            <h2 className="section-title">Draft Your Hook Angle</h2>
+          </div>
+
+          {/* Mode Selector tabs (Centered) */}
+          <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', maxWidth: '340px', margin: '0 auto', width: '100%'}}>
             <button 
               className={`btn ${mode === 'template' ? 'btn-accent' : 'btn-secondary'}`}
               onClick={() => setMode('template')}
@@ -247,164 +257,176 @@ export default function App() {
             </button>
           </div>
 
-          <div className="scroll-panel">
-            {mode === 'template' ? (
-              <>
-                <h4 className="form-title">1. Select psychological framework</h4>
-                <div className="templates-carousel">
-                  {templates.map((t, idx) => (
-                    <div 
-                      key={t.id} 
-                      className={`template-card ${activeTemplateIdx === idx ? 'active' : ''}`}
-                      onClick={() => setActiveTemplateIdx(idx)}
-                    >
-                      <span className="card-tag">{t.tag}</span>
-                      <h5 className="card-title">{t.name}</h5>
-                      <p className="card-desc">{t.description}</p>
-                    </div>
-                  ))}
-                </div>
-
-                <h4 className="form-title">2. Fill in the blanks</h4>
-                <div className="input-section">
-                  {templates[activeTemplateIdx].placeholders.map((ph, idx) => (
-                    <div key={idx} className="blank-group">
-                      <label className="blank-label">
-                        Field #{idx + 1}: {ph}
-                        {activeInputIdx === idx && <span style={{color: 'var(--color-primary)', marginLeft: '8px', fontSize: '10px'}}>● Editing</span>}
-                      </label>
-                      <input 
-                        type="text" 
-                        className="blank-input" 
-                        placeholder={`e.g. ${ph}`}
-                        value={inputs[idx] || ''}
-                        onFocus={() => setActiveInputIdx(idx)}
-                        onChange={(e) => {
-                          const newInputs = [...inputs];
-                          newInputs[idx] = e.target.value;
-                          setInputs(newInputs);
-                        }}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <>
-                <h4 className="form-title">Custom video hook text</h4>
-                <div className="input-section">
-                  <textarea
-                    ref={customInputRef}
-                    className="blank-input custom-editor-text"
-                    value={customHookText}
-                    onChange={(e) => setCustomHookText(e.target.value)}
-                    placeholder="Type your own custom hook here..."
-                  />
-                </div>
-              </>
-            )}
-
-            {/* Click Inserter word panel */}
-            <div style={{marginTop: 'auto', borderTop: '1px solid var(--border-color)', paddingTop: '16px'}}>
-              <h5 className="blank-label" style={{marginBottom: '10px'}}>
-                ⚡ Quick Insert High-CTR Words (Click to add)
-              </h5>
-              <div style={{display: 'flex', flexDirection: 'column', gap: '10px'}}>
-                <div>
-                  <span style={{fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase'}}>Curiosity:</span>
-                  <div style={{display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '4px'}}>
-                    {triggerWords.curiosity.slice(0, 6).map(w => (
-                      <span key={w} className="word-pill" onClick={() => insertTriggerWord(w)}>{w}</span>
-                    ))}
+          {mode === 'template' ? (
+            <>
+              <h4 className="blank-label" style={{color: 'var(--text-muted)'}}>Select a copywriting framework</h4>
+              <div className="templates-carousel">
+                {templates.map((t, idx) => (
+                  <div 
+                    key={t.id} 
+                    className={`template-card ${activeTemplateIdx === idx ? 'active' : ''}`}
+                    onClick={() => setActiveTemplateIdx(idx)}
+                  >
+                    <span className="card-tag">{t.tag}</span>
+                    <h5 className="card-title">{t.name}</h5>
+                    <p className="card-desc">{t.description}</p>
                   </div>
-                </div>
-                <div>
-                  <span style={{fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase'}}>Urgency:</span>
-                  <div style={{display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '4px'}}>
-                    {triggerWords.urgency.slice(0, 6).map(w => (
-                      <span key={w} className="word-pill" onClick={() => insertTriggerWord(w)}>{w}</span>
-                    ))}
-                  </div>
-                </div>
+                ))}
               </div>
-            </div>
 
-          </div>
-        </div>
-
-        {/* COLUMN 2: iPhone Mockup Simulator */}
-        <div className="column phone-column">
-          <div 
-            className="phone-mockup"
-            style={{backgroundImage: `url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=300&auto=format&fit=crop')`, backgroundStyle: 'cover'}}
-          >
-            <div className="phone-notch"></div>
-            
-            {/* Subtitles Overlay */}
-            <div className="simulated-caption-wrapper">
-              <div 
-                className="simulated-caption"
-                style={{
-                  fontFamily: captionFont === 'Impact' ? 'Impact, sans-serif' : captionFont === 'Comic Sans MS' ? '"Comic Sans MS", cursive' : captionFont === 'Trebuchet MS' ? '"Trebuchet MS", sans-serif' : '"Arial Black", sans-serif',
-                  fontSize: `${captionSize}px`,
-                  color: captionColor
-                }}
-              >
-                {subtitleWords.map((word, idx) => {
-                  const isActive = activeWordIdx === idx;
-                  return (
-                    <span 
-                      key={idx}
-                      className={isActive ? 'word-highlight' : ''}
-                      style={{
-                        color: isActive ? captionColor : '#FFFFFF'
+              <h4 className="blank-label" style={{color: 'var(--text-muted)'}}>Fill in the blanks</h4>
+              <div className="inputs-grid">
+                {templates[activeTemplateIdx].placeholders.map((ph, idx) => (
+                  <div key={idx} className="blank-group">
+                    <label className="blank-label">
+                      Field #{idx + 1}: {ph}
+                      {activeInputIdx === idx && <span style={{color: 'var(--color-primary)', marginLeft: '8px', fontSize: '10px'}}>● Editing</span>}
+                    </label>
+                    <input 
+                      type="text" 
+                      className="blank-input" 
+                      placeholder={`e.g. ${ph}`}
+                      value={inputs[idx] || ''}
+                      onFocus={() => setActiveInputIdx(idx)}
+                      onChange={(e) => {
+                        const newInputs = [...inputs];
+                        newInputs[idx] = e.target.value;
+                        setInputs(newInputs);
                       }}
-                    >
-                      {word}
-                    </span>
-                  );
-                })}
+                    />
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <>
+              <h4 className="blank-label" style={{color: 'var(--text-muted)'}}>Custom Video Hook Input</h4>
+              <div className="blank-group">
+                <textarea
+                  ref={customInputRef}
+                  className="blank-input custom-editor-text"
+                  value={customHookText}
+                  onChange={(e) => setCustomHookText(e.target.value)}
+                  placeholder="Type your own custom hook here..."
+                />
+              </div>
+            </>
+          )}
+
+          {/* Quick Insert Word Cloud at bottom of card */}
+          <div style={{borderTop: '1px solid var(--border-color)', paddingTop: '20px'}}>
+            <h5 className="blank-label" style={{marginBottom: '12px'}}>
+              ⚡ Quick Insert High-CTR Words (Click to append to your active field)
+            </h5>
+            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px'}}>
+              <div>
+                <span style={{fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', fontFamily: 'var(--font-mono)'}}>Curiosity Multipliers:</span>
+                <div style={{display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '6px'}}>
+                  {triggerWords.curiosity.slice(0, 7).map(w => (
+                    <span key={w} className="word-pill" onClick={() => insertTriggerWord(w)}>{w}</span>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <span style={{fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', fontFamily: 'var(--font-mono)'}}>Urgency & Command Cues:</span>
+                <div style={{display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '6px'}}>
+                  {triggerWords.urgency.slice(0, 7).map(w => (
+                    <span key={w} className="word-pill" onClick={() => insertTriggerWord(w)}>{w}</span>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
+        </section>
 
-          <div style={{width: '290px', display: 'flex', gap: '10px'}}>
-            <button className="btn btn-secondary" style={{flex: 1}} onClick={() => setBgPreset((bgPreset + 1) % phoneBackgrounds.length)}>
-              🔄 Background
-            </button>
-            <button className="btn btn-secondary" style={{flex: 1}} onClick={() => {
-              const styles = ['capitalized', 'uppercase', 'lowercase'];
-              const currentIdx = styles.indexOf(captionStyle);
-              setCaptionStyle(styles[(currentIdx + 1) % styles.length]);
-            }}>
-              Aa Text Case
-            </button>
+        {/* STEP 2: Phone simulator & Analytics cards side-by-side */}
+        <div className="results-grid">
+          
+          {/* Left Column: Phone simulator panel inside a Glassmorphic card */}
+          <div className="phone-panel section-card">
+            <div className="section-header" style={{width: '100%'}}>
+              <div className="section-num">02</div>
+              <h2 className="section-title">Kinetic Subtitle Preview</h2>
+            </div>
+
+            <div 
+              className="phone-mockup"
+              style={{
+                backgroundImage: `url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=300&auto=format&fit=crop')`, 
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat'
+              }}
+            >
+              <div className="phone-notch"></div>
+              
+              <div className="simulated-caption-wrapper">
+                <div 
+                  className="simulated-caption"
+                  style={{
+                    fontFamily: captionFont === 'Impact' ? 'Impact, sans-serif' : captionFont === 'Comic Sans MS' ? '"Comic Sans MS", cursive' : captionFont === 'Trebuchet MS' ? '"Trebuchet MS", sans-serif' : '"Arial Black", sans-serif',
+                    fontSize: `${captionSize}px`,
+                    color: captionColor
+                  }}
+                >
+                  {subtitleWords.map((word, idx) => {
+                    const isActive = activeWordIdx === idx;
+                    return (
+                      <span 
+                        key={idx}
+                        className={isActive ? 'word-highlight' : ''}
+                        style={{
+                          color: isActive ? captionColor : '#FFFFFF'
+                        }}
+                      >
+                        {word}
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            <div style={{width: '320px', display: 'flex', gap: '10px'}}>
+              <button className="btn btn-secondary" style={{flex: 1}} onClick={() => setBgPreset((bgPreset + 1) % phoneBackgrounds.length)}>
+                🔄 Background
+              </button>
+              <button className="btn btn-secondary" style={{flex: 1}} onClick={() => {
+                const styles = ['capitalized', 'uppercase', 'lowercase'];
+                const currentIdx = styles.indexOf(captionStyle);
+                setCaptionStyle(styles[(currentIdx + 1) % styles.length]);
+              }}>
+                Aa Text Case
+              </button>
+            </div>
           </div>
-        </div>
 
-        {/* COLUMN 3: Analytics, Gemini & Styles */}
-        <div className="column">
-          <div className="scroll-panel">
-            
-            {/* Visual overall score header */}
+          {/* Right Column: Analytics, Gemini AI Polish & Customizers */}
+          <div className="analytics-panel section-card">
+            <div className="section-header">
+              <div className="section-num">03</div>
+              <h2 className="section-title">Copywriting Analytics & AI</h2>
+            </div>
+
+            {/* Overal scoring dial banner */}
             <div className="score-summary-card">
               <div className="overall-score-circle" style={{border: `4px solid ${getMetricColor(evaluation.overall)}`}}>
                 <span className="overall-score-num" style={{color: getMetricColor(evaluation.overall)}}>{evaluation.overall}</span>
                 <span className="overall-score-label">Score</span>
               </div>
               <div className="score-stats">
-                <span className="score-title">Hook Strength</span>
+                <span className="score-title">Hook Performance</span>
                 <span className="score-rating" style={{color: getMetricColor(evaluation.overall)}}>
-                  {evaluation.overall >= 80 ? '🔥 Highly Viral' : evaluation.overall >= 55 ? '⚡ Solid Draft' : '⚠️ Needs Polish'}
+                  {evaluation.overall >= 80 ? '🔥 Highly Optimized (Viral)' : evaluation.overall >= 55 ? '⚡ Strong Draft' : '⚠️ Needs Tuning'}
                 </span>
               </div>
             </div>
 
-            {/* Individual score metrics */}
-            <div style={{display: 'flex', flexDirection: 'column', gap: '14px'}}>
+            {/* Core grading progress bars */}
+            <div style={{display: 'flex', flexDirection: 'column', gap: '16px'}}>
               <div className="metric-row">
                 <div className="metric-meta">
-                  <span className="metric-name">Curiosity (Intrigue)</span>
+                  <span className="metric-name">Curiosity (Psychological Loop)</span>
                   <span className="metric-val" style={{color: getMetricColor(evaluation.curiosity)}}>{evaluation.curiosity}%</span>
                 </div>
                 <div className="progress-track">
@@ -413,7 +435,7 @@ export default function App() {
               </div>
               <div className="metric-row">
                 <div className="metric-meta">
-                  <span className="metric-name">Clarity (Readability)</span>
+                  <span className="metric-name">Clarity (Readability Index)</span>
                   <span className="metric-val" style={{color: getMetricColor(evaluation.clarity)}}>{evaluation.clarity}%</span>
                 </div>
                 <div className="progress-track">
@@ -422,7 +444,7 @@ export default function App() {
               </div>
               <div className="metric-row">
                 <div className="metric-meta">
-                  <span className="metric-name">Urgency (Instant Hook)</span>
+                  <span className="metric-name">Urgency (Instant Attention)</span>
                   <span className="metric-val" style={{color: getMetricColor(evaluation.urgency)}}>{evaluation.urgency}%</span>
                 </div>
                 <div className="progress-track">
@@ -431,7 +453,7 @@ export default function App() {
               </div>
               <div className="metric-row">
                 <div className="metric-meta">
-                  <span className="metric-name">Emotional Power</span>
+                  <span className="metric-name">Emotional Appeal</span>
                   <span className="metric-val" style={{color: getMetricColor(evaluation.emotion)}}>{evaluation.emotion}%</span>
                 </div>
                 <div className="progress-track">
@@ -440,13 +462,13 @@ export default function App() {
               </div>
             </div>
 
-            {/* Subtitle customizers */}
+            {/* Simulated subtitle controls */}
             <div style={{borderTop: '1px solid var(--border-color)', paddingTop: '16px'}}>
-              <h5 className="blank-label" style={{marginBottom: '12px'}}>Customize Simulator Caption</h5>
+              <h5 className="blank-label" style={{marginBottom: '12px'}}>Customize Simulated Caption</h5>
               <div className="config-grid">
                 <div className="form-group">
-                  <label className="form-label" style={{fontSize: '9px'}}>Font Family</label>
-                  <select className="form-select" value={captionFont} onChange={(e) => setCaptionFont(e.target.value)} style={{padding: '6px 8px', fontSize: '12px'}}>
+                  <label className="blank-label" style={{fontSize: '9px'}}>Font Style</label>
+                  <select className="form-select" value={captionFont} onChange={(e) => setCaptionFont(e.target.value)}>
                     <option value="Arial Black">Arial Black</option>
                     <option value="Impact">Impact</option>
                     <option value="Trebuchet MS">Trebuchet MS</option>
@@ -454,8 +476,8 @@ export default function App() {
                   </select>
                 </div>
                 <div className="form-group">
-                  <label className="form-label" style={{fontSize: '9px'}}>Text Highlight Color</label>
-                  <select className="form-select" value={captionColor} onChange={(e) => setCaptionColor(e.target.value)} style={{padding: '6px 8px', fontSize: '12px'}}>
+                  <label className="blank-label" style={{fontSize: '9px'}}>Highlight color</label>
+                  <select className="form-select" value={captionColor} onChange={(e) => setCaptionColor(e.target.value)}>
                     <option value="#FFFF00">Yellow</option>
                     <option value="#00FF00">Green</option>
                     <option value="#FF007F">Hot Pink</option>
@@ -465,13 +487,13 @@ export default function App() {
               </div>
             </div>
 
-            {/* AI polish & copywriting tips */}
-            <div style={{borderTop: '1px solid var(--border-color)', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '14px'}}>
+            {/* AI polish & copywriting recommendations */}
+            <div style={{borderTop: '1px solid var(--border-color)', paddingTop: '20px', display: 'flex', flexDirection: 'column', gap: '16px'}}>
               <button className="btn btn-accent" onClick={polishHookWithAI} disabled={loadingAi}>
                 {loadingAi ? (
                   <>
-                    <div className="spinner" style={{width: '16px', height: '16px', borderWidth: '2px', margin: 0}}></div>
-                    AI is Polishing...
+                    <div className="spinner"></div>
+                    Polishing Hook with AI...
                   </>
                 ) : (
                   <>
@@ -484,22 +506,22 @@ export default function App() {
               </button>
 
               {aiSuggestions.length > 0 && (
-                <div style={{backgroundColor: 'rgba(135, 90, 255, 0.05)', border: '1px solid rgba(135, 90, 255, 0.2)', padding: '12px', borderRadius: 'var(--radius-md)'}}>
-                  <h6 className="blank-label" style={{color: 'var(--color-secondary)', marginBottom: '8px'}}>AI Recommended Variations:</h6>
+                <div style={{backgroundColor: 'rgba(135, 90, 255, 0.04)', border: '1px solid rgba(135, 90, 255, 0.15)', padding: '16px', borderRadius: 'var(--radius-lg)'}}>
+                  <h6 className="blank-label" style={{color: 'var(--color-secondary)', marginBottom: '10px'}}>AI Recommended Variations (Click to Use):</h6>
                   <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
                     {aiSuggestions.map((s, idx) => (
-                      <div key={idx} style={{display: 'flex', gap: '6px', alignItems: 'center', fontSize: '12px', background: 'var(--bg-tertiary)', padding: '8px', borderRadius: 'var(--radius-sm)'}}>
-                        <p style={{flex: 1, color: 'var(--text-primary)'}}>{s}</p>
-                        <button className="word-pill" style={{padding: '3px 6px', fontSize: '10px'}} onClick={() => selectSuggestedHook(s)}>Use</button>
+                      <div key={idx} style={{display: 'flex', gap: '10px', alignItems: 'center', fontSize: '13px', background: 'var(--bg-tertiary)', padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)'}}>
+                        <p style={{flex: 1, color: 'var(--text-primary)', fontWeight: '500'}}>{s}</p>
+                        <button className="word-pill" style={{padding: '4px 8px', fontSize: '11px', fontWeight: '600'}} onClick={() => selectSuggestedHook(s)}>Use</button>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
 
-              {/* Offline advice tips */}
+              {/* Actionable offline copywriting advice */}
               <div className="tips-list">
-                <h5 className="blank-label">Actionable Advice</h5>
+                <h5 className="blank-label">Offline Copywriting Feedback</h5>
                 {evaluation.tips.map((tip, idx) => (
                   <div key={idx} className="tip-item">
                     <div className="tip-text">{tip}</div>
@@ -509,20 +531,21 @@ export default function App() {
             </div>
 
             {/* Export buttons */}
-            <div style={{marginTop: 'auto', borderTop: '1px solid var(--border-color)', paddingTop: '16px'}}>
+            <div style={{marginTop: 'auto', borderTop: '1px solid var(--border-color)', paddingTop: '20px'}}>
               <button className="btn" onClick={() => copyToClipboard(hookText)}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
                   <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
                 </svg>
-                Copy Hook to Clipboard
+                Copy Final Hook to Clipboard
               </button>
             </div>
 
           </div>
+
         </div>
 
-      </main>
+      </div>
 
       {/* Modal removed: API Key configured via environment variables */}
 

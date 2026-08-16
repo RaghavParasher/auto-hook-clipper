@@ -140,7 +140,7 @@ export default function App() {
     const prompt = `You are a viral copywriting expert. Take the following video hook: "${hookText}". Generate exactly 3 highly engaging, high-converting variations of this hook that leverage psychological curiosity gaps, negative framing, or authority. Keep each hook under 15 words. Format your output strictly as a JSON array of strings, for example: ["Variation 1", "Variation 2", "Variation 3"]. Output ONLY the raw JSON block without markdown formatting or surrounding explanation text.`;
 
     try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`;
       const res = await fetch(url, {
         method: 'POST',
         headers: {
